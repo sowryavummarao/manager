@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { emailChanged, passwordChanged } from '../actions';
-//import { View } from 'react-native';
-import { Card, CardSection, Input, Button } from './common';
+import { View, Text } from 'react-native';
+import { emailChanged, passwordChanged, loginUser } from '../actions';
+import { Card, CardSection, Input, Button, Spinner } from './common';
 
 class LoginForm extends Component {
   onEmailChange(text) {
@@ -11,6 +11,33 @@ class LoginForm extends Component {
 
   onPasswordChange(text) {
     this.props.passwordChanged(text);
+  }
+
+  onButtonPress() {
+    this.props.loginUser(this.props.email, this.props.password);
+  }
+
+  renderError() {
+    if (this.props.error) {
+      return (
+        <View style={{ backgroundColor: 'white' }}>
+          <Text style={styles.errorTextStyle}>
+            {this.props.error}
+          </Text>
+        </View>
+      );
+    }
+  }
+
+  renderButton() {
+    if (this.props.loading) {
+      return (
+        <Spinner size='large' />
+      );
+    }
+    return (
+      <Button text='Login' onPress={this.onButtonPress.bind(this)} />
+    );
   }
 
   render() {
@@ -33,19 +60,35 @@ class LoginForm extends Component {
             value={this.props.password}
           />
         </CardSection>
+
+        {this.renderError()};
+
         <CardSection>
-          <Button text='Login' />
+          {this.renderButton()};
         </CardSection>
       </Card>
     );
   }
 }
+const styles = {
+  errorTextStyle: {
+    fontSize: 20,
+    alignSelf: 'center',
+    color: 'red'
+  }
+};
 
 const mapStateToProps = state => {
   return {
     email: state.auth.email,
     password: state.auth.password,
+    error: state.auth.error,
+    loading: state.auth.loading
   };
 };
 
-export default connect(mapStateToProps, { emailChanged, passwordChanged })(LoginForm);
+export default connect(mapStateToProps, {
+  emailChanged,
+  passwordChanged,
+  loginUser
+})(LoginForm);
